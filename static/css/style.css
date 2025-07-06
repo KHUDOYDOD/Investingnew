@@ -1,0 +1,147 @@
+/* Custom styles for ZIP extractor */
+
+.drop-zone {
+    border: 2px dashed var(--bs-border-color);
+    border-radius: 0.5rem;
+    padding: 3rem 2rem;
+    text-align: center;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    background-color: var(--bs-body-bg);
+}
+
+.drop-zone:hover {
+    border-color: var(--bs-primary);
+    background-color: var(--bs-primary-bg-subtle);
+}
+
+.drop-zone.drag-over {
+    border-color: var(--bs-primary);
+    background-color: var(--bs-primary-bg-subtle);
+    transform: scale(1.02);
+}
+
+.drop-zone.file-selected {
+    border-color: var(--bs-success);
+    background-color: var(--bs-success-bg-subtle);
+}
+
+.drop-zone-content {
+    pointer-events: none;
+}
+
+.file-info {
+    padding: 1rem;
+    border: 1px solid var(--bs-border-color);
+    border-radius: 0.5rem;
+    background-color: var(--bs-body-bg);
+}
+
+.progress {
+    height: 0.5rem;
+    background-color: var(--bs-gray-200);
+}
+
+.progress-bar {
+    background-color: var(--bs-primary);
+}
+
+/* Table improvements */
+.table th {
+    border-bottom: 2px solid var(--bs-border-color);
+    font-weight: 600;
+}
+
+.table td {
+    vertical-align: middle;
+}
+
+/* Card improvements */
+.card {
+    border: 1px solid var(--bs-border-color);
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+.card-header {
+    background-color: var(--bs-body-bg);
+    border-bottom: 1px solid var(--bs-border-color);
+}
+
+/* Animation for alerts */
+.alert {
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateY(-20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Responsive improvements */
+@media (max-width: 768px) {
+    .drop-zone {
+        padding: 2rem 1rem;
+    }
+    
+    .display-4 {
+        font-size: 2rem;
+    }
+    
+    .container {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+}
+
+/* File icon colors */
+.fa-file-archive {
+    color: var(--bs-warning);
+}
+
+.fa-file-alt {
+    color: var(--bs-info);
+}
+
+.fa-folder-open {
+    color: var(--bs-primary);
+}
+
+/* Loading states */
+.btn:disabled {
+    opacity: 0.7;
+}
+
+/* Smooth transitions */
+* {
+    transition: all 0.2s ease;
+}
+
+/* Focus styles for accessibility */
+.drop-zone:focus-within {
+    outline: 2px solid var(--bs-primary);
+    outline-offset: 2px;
+}
+
+/* Custom scrollbar for table */
+.table-responsive::-webkit-scrollbar {
+    height: 8px;
+}
+
+.table-responsive::-webkit-scrollbar-track {
+    background: var(--bs-gray-100);
+}
+
+.table-responsive::-webkit-scrollbar-thumb {
+    background: var(--bs-gray-400);
+    border-radius: 4px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb:hover {
+    background: var(--bs-gray-500);
+}

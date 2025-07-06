@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZIP Archive Extractor</title>
+    <link href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-4">
+        <!-- Header -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <h1 class="display-4 text-center mb-3">
+                    <i class="fas fa-file-archive me-2"></i>
+                    ZIP Archive Extractor
+                </h1>
+                <p class="lead text-center text-muted">
+                    Upload and extract ZIP archives with ease
+                </p>
+            </div>
+        </div>
+
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'danger' if category == 'error' else 'success' }} alert-dismissible fade show" role="alert">
+                        <i class="fas fa-{{ 'exclamation-triangle' if category == 'error' else 'check-circle' }} me-2"></i>
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- Upload Section -->
+        <div class="row justify-content-center mb-5">
+            <div class="col-lg-8">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title mb-4">
+                            <i class="fas fa-upload me-2"></i>
+                            Upload ZIP Archive
+                        </h5>
+                        
+                        <form id="uploadForm" action="{{ url_for('upload_file') }}" method="post" enctype="multipart/form-data">
+                            <!-- Drop Zone -->
+                            <div id="dropZone" class="drop-zone mb-3">
+                                <div class="drop-zone-content">
+                                    <i class="fas fa-cloud-upload-alt fa-3x mb-3"></i>
+                                    <h6>Drag & Drop ZIP file here</h6>
+                                    <p class="text-muted">or click to select file</p>
+                                    <input type="file" id="fileInput" name="file" accept=".zip" hidden>
+                                </div>
+                            </div>
+
+                            <!-- File Info -->
+                            <div id="fileInfo" class="file-info mb-3" style="display: none;">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-file-archive fa-2x me-3"></i>
+                                    <div class="flex-grow-1">
+                                        <h6 id="fileName" class="mb-1"></h6>
+                                        <small id="fileSize" class="text-muted"></small>
+                                    </div>
+                                    <button type="button" id="removeFile" class="btn btn-sm btn-outline-danger">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Progress Bar -->
+                            <div id="progressContainer" class="mb-3" style="display: none;">
+                                <div class="progress">
+                                    <div id="progressBar" class="progress-bar progress-bar-striped progress-bar-animated" 
+                                         role="progressbar" style="width: 0%"></div>
+                                </div>
+                                <small class="text-muted">Uploading and extracting...</small>
+                            </div>
+
+                            <!-- Upload Button -->
+                            <button type="submit" id="uploadBtn" class="btn btn-primary w-100" disabled>
+                                <i class="fas fa-upload me-2"></i>
+                                Upload & Extract
+                            </button>
+                        </form>
+
+                        <!-- Upload Info -->
+                        <div class="mt-3">
+                            <small class="text-muted">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Maximum file size: 100MB. Only ZIP files are supported.
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Extracted Files Section -->
+        {% if extracted_files %}
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="fas fa-folder-open me-2"></i>
+                            Extracted Files ({{ extracted_files|length }})
+                        </h5>
+                        <form method="post" action="{{ url_for('clear_files') }}" class="d-inline">
+                            <button type="submit" class="btn btn-outline-danger btn-sm" 
+                                    onclick="return confirm('Are you sure you want to clear all extracted files?')">
+                                <i class="fas fa-trash me-1"></i>
+                                Clear All
+                            </button>
+                        </form>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th><i class="fas fa-file me-1"></i>File Name</th>
+                                        <th><i class="fas fa-weight me-1"></i>Size</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for file in extracted_files %}
+                                    <tr>
+                                        <td>
+                                            <i class="fas fa-file-alt me-2 text-muted"></i>
+                                            {{ file.name }}
+                                        </td>
+                                        <td>{{ file.size_formatted }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body text-center py-5">
+                        <i class="fas fa-folder-open fa-3x text-muted mb-3"></i>
+                        <h5>No extracted files</h5>
+                        <p class="text-muted">Upload a ZIP archive to see extracted files here</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Footer -->
+    <footer class="container mt-5 py-4">
+        <div class="text-center text-muted">
+            <small>
+                <i class="fas fa-shield-alt me-1"></i>
+                Secure ZIP extraction with file validation
+            </small>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/upload.js') }}"></script>
+</body>
+</html>
