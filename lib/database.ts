@@ -1,154 +1,152 @@
-// ⚠️ Stubbed SQL query – replace with real DB logic in production
+import { Pool } from 'pg'
+
+// Create PostgreSQL connection pool
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+})
+
+// Real SQL query function
 export async function query<Row = Record<string, unknown>>(
-  _sql: string,
-  _params: unknown[] = [],
+  sql: string,
+  params: unknown[] = [],
 ): Promise<{ rows: Row[]; rowCount: number }> {
-  if (process.env.NODE_ENV === "development") {
-    console.warn("[database] query() stub was called. Provide a real DB implementation for production.")
+  try {
+    const result = await pool.query(sql, params)
+    return { rows: result.rows as Row[], rowCount: result.rowCount || 0 }
+  } catch (error) {
+    console.error('[database] Query error:', error)
+    throw error
   }
-  return { rows: [], rowCount: 0 }
 }
 
-// Заглушка для базы данных без внешних зависимостей
+// Database types
 export interface User {
-  id: number
-  name: string
+  id: string
+  full_name: string
   email: string
-  avatar?: string
-  joinedAt: string
+  password_hash: string
+  phone?: string
   country?: string
-  totalInvested?: number
-  totalProfit?: number
+  balance: number
+  total_invested: number
+  total_earned: number
+  referral_code?: string
+  created_at: string
+  updated_at: string
 }
 
 export interface Transaction {
   id: number
-  userId: number
-  type: "deposit" | "withdrawal" | "profit"
+  user_id: string
+  type: "deposit" | "withdrawal" | "profit" | "investment"
   amount: number
   status: "pending" | "completed" | "failed"
-  createdAt: string
+  created_at: string
   description?: string
 }
 
 export interface Investment {
   id: number
-  userId: number
-  planId: number
+  user_id: string
+  plan_id: number
   amount: number
-  profit: number
+  total_profit: number
   status: "active" | "completed" | "cancelled"
-  startDate: string
-  endDate?: string
+  start_date: string
+  end_date?: string
 }
 
-// Моковые данные
-export const mockUsers: User[] = [
-  {
-    id: 1,
-    name: "Александр Петров",
-    email: "alex@example.com",
-    avatar: "/placeholder.svg?height=40&width=40",
-    joinedAt: "2024-01-15T10:30:00Z",
-    country: "RU",
-    totalInvested: 50000,
-    totalProfit: 12500,
-  },
-  {
-    id: 2,
-    name: "Maria Garcia",
-    email: "maria@example.com",
-    avatar: "/placeholder.svg?height=40&width=40",
-    joinedAt: "2024-01-14T15:45:00Z",
-    country: "ES",
-    totalInvested: 25000,
-    totalProfit: 6250,
-  },
-  {
-    id: 3,
-    name: "John Smith",
-    email: "john@example.com",
-    avatar: "/placeholder.svg?height=40&width=40",
-    joinedAt: "2024-01-13T09:20:00Z",
-    country: "US",
-    totalInvested: 75000,
-    totalProfit: 18750,
-  },
-]
-
-export const mockTransactions: Transaction[] = [
-  {
-    id: 1,
-    userId: 1,
-    type: "deposit",
-    amount: 10000,
-    status: "completed",
-    createdAt: "2024-01-15T11:00:00Z",
-    description: "Пополнение счета",
-  },
-  {
-    id: 2,
-    userId: 2,
-    type: "profit",
-    amount: 1250,
-    status: "completed",
-    createdAt: "2024-01-15T10:45:00Z",
-    description: "Прибыль по инвестиции",
-  },
-  {
-    id: 3,
-    userId: 3,
-    type: "withdrawal",
-    amount: 5000,
-    status: "pending",
-    createdAt: "2024-01-15T10:30:00Z",
-    description: "Вывод средств",
-  },
-]
-
-// Функции для работы с данными
+// Real database functions
 export async function getUsers(limit = 10): Promise<User[]> {
-  // Имитация задержки API
-  await new Promise((resolve) => setTimeout(resolve, 100))
-  return mockUsers.slice(0, limit)
+  const result = await query<User>('SELECT * FROM users LIMIT $1', [limit])
+  return result.rows
 }
 
 export async function getTransactions(limit = 10): Promise<Transaction[]> {
-  await new Promise((resolve) => setTimeout(resolve, 100))
-  return mockTransactions.slice(0, limit)
+  const result = await query<Transaction>('SELECT * FROM transactions ORDER BY created_at DESC LIMIT $1', [limit])
+  return result.rows
 }
 
 export async function getStatistics() {
-  await new Promise((resolve) => setTimeout(resolve, 100))
+  const [usersResult, investmentsResult] = await Promise.all([
+    query<{ count: string }>('SELECT COUNT(*) as count FROM users'),
+    query<{ total_invested: string; total_earned: string }>('SELECT SUM(total_invested) as total_invested, SUM(total_earned) as total_earned FROM users')
+  ])
+  
+  const totalUsers = parseInt(usersResult.rows[0]?.count || '0')
+  const totalInvestments = parseFloat(investmentsResult.rows[0]?.total_invested || '0')
+  const totalProfit = parseFloat(investmentsResult.rows[0]?.total_earned || '0')
+  
   return {
-    totalUsers: mockUsers.length,
-    totalInvestments: mockUsers.reduce((sum, user) => sum + (user.totalInvested || 0), 0),
-    totalProfit: mockUsers.reduce((sum, user) => sum + (user.totalProfit || 0), 0),
-    activeInvestments: 1247,
-    completedInvestments: 3892,
-    averageReturn: 18.5,
+    totalUsers,
+    totalInvestments,
+    totalProfit,
+    activeInvestments: 0, // будет реализовано позже
+    completedInvestments: 0, // будет реализовано позже
+    averageReturn: totalInvestments > 0 ? (totalProfit / totalInvestments) * 100 : 0,
   }
 }
 
-// Mock implementations for getClient, testConnection, initializeDatabase, and pool
+// Database utility functions
 export async function getClient() {
-  console.warn("[database] getClient() stub was called. Provide a real DB implementation for production.")
-  return {}
+  return pool.connect()
 }
 
 export async function testConnection() {
-  console.warn("[database] testConnection() stub was called. Provide a real DB implementation for production.")
-  return true
+  try {
+    const result = await pool.query('SELECT 1')
+    return result.rows.length > 0
+  } catch (error) {
+    console.error('[database] Connection test failed:', error)
+    return false
+  }
 }
 
 export async function initializeDatabase() {
-  console.warn("[database] initializeDatabase() stub was called. Provide a real DB implementation for production.")
-  return true
+  try {
+    // Check if users table exists
+    const result = await pool.query(`
+      SELECT table_name 
+      FROM information_schema.tables 
+      WHERE table_schema = 'public' AND table_name = 'users'
+    `)
+    return result.rows.length > 0
+  } catch (error) {
+    console.error('[database] Database initialization check failed:', error)
+    return false
+  }
 }
 
-export const pool = {
-  query: async () => {
-    console.warn("[database] pool.query() stub was called. Provide a real DB implementation for production.")
-    return { rows: [], rowCount: 0 }
-  },
+// Export the pool for direct usage
+export { pool }
+
+// Authentication functions
+export async function getUserByEmail(email: string): Promise<User | null> {
+  const result = await query<User>('SELECT * FROM users WHERE email = $1', [email])
+  return result.rows[0] || null
+}
+
+export async function getUserByEmailOrName(emailOrName: string): Promise<User | null> {
+  const result = await query<User>(
+    'SELECT * FROM users WHERE email = $1 OR full_name = $1', 
+    [emailOrName]
+  )
+  return result.rows[0] || null
+}
+
+export async function createUser(userData: {
+  email: string
+  full_name: string
+  password_hash: string
+  phone?: string
+  country?: string
+}): Promise<User> {
+  const result = await query<User>(`
+    INSERT INTO users (email, full_name, password_hash, phone, country, balance, total_invested, total_earned)
+    VALUES ($1, $2, $3, $4, $5, 0, 0, 0)
+    RETURNING *
+  `, [userData.email, userData.full_name, userData.password_hash, userData.phone, userData.country])
+  
+  return result.rows[0]
 }

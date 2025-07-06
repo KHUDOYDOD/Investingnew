@@ -1,57 +1,56 @@
 import { NextResponse } from "next/server"
-import { createClient } from "@supabase/supabase-js"
-
-const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!)
+import { query } from "@/lib/database"
 
 export async function GET() {
   try {
     // Получаем общее количество пользователей
-    const { count: totalUsers } = await supabase.from("users").select("*", { count: "exact", head: true })
+    const usersResult = await query<{ count: string }>("SELECT COUNT(*) as count FROM users")
+    const totalUsers = parseInt(usersResult.rows[0]?.count || '0')
 
     // Получаем общую сумму депозитов
-    const { data: depositsData } = await supabase
-      .from("transactions")
-      .select("amount")
-      .eq("type", "deposit")
-      .eq("status", "completed")
-
-    const totalDeposits = depositsData?.reduce((sum, transaction) => sum + transaction.amount, 0) || 0
+    const depositsResult = await query<{ total: string }>(`
+      SELECT COALESCE(SUM(amount), 0) as total
+      FROM transactions 
+      WHERE type = 'deposit' AND status = 'completed'
+    `)
+    const totalDeposits = parseFloat(depositsResult.rows[0]?.total || '0')
 
     // Получаем общую сумму активных инвестиций
-    const { data: investmentsData } = await supabase.from("investments").select("amount").eq("status", "active")
-
-    const totalInvested = investmentsData?.reduce((sum, investment) => sum + investment.amount, 0) || 0
+    const investmentsResult = await query<{ total: string }>(`
+      SELECT COALESCE(SUM(amount), 0) as total
+      FROM investments 
+      WHERE status = 'active'
+    `)
+    const totalInvested = parseFloat(investmentsResult.rows[0]?.total || '0')
 
     // Получаем общую сумму выплат
-    const { data: payoutsData } = await supabase
-      .from("transactions")
-      .select("amount")
-      .eq("type", "withdrawal")
-      .eq("status", "completed")
-
-    const totalPayouts = payoutsData?.reduce((sum, transaction) => sum + transaction.amount, 0) || 0
+    const payoutsResult = await query<{ total: string }>(`
+      SELECT COALESCE(SUM(amount), 0) as total
+      FROM transactions 
+      WHERE type = 'withdrawal' AND status = 'completed'
+    `)
+    const totalPayouts = parseFloat(payoutsResult.rows[0]?.total || '0')
 
     // Получаем статистику за прошлый период для расчета дельты
     const lastWeek = new Date()
     lastWeek.setDate(lastWeek.getDate() - 7)
 
-    const { count: usersLastWeek } = await supabase
-      .from("users")
-      .select("*", { count: "exact", head: true })
-      .lt("created_at", lastWeek.toISOString())
+    const usersLastWeekResult = await query(
+      "SELECT COUNT(*) as count FROM users WHERE created_at < $1",
+      [lastWeek.toISOString()]
+    )
+    const usersLastWeek = parseInt(usersLastWeekResult.rows[0]?.count || '0')
 
-    const { data: depositsLastWeek } = await supabase
-      .from("transactions")
-      .select("amount")
-      .eq("type", "deposit")
-      .eq("status", "completed")
-      .lt("created_at", lastWeek.toISOString())
-
-    const totalDepositsLastWeek = depositsLastWeek?.reduce((sum, transaction) => sum + transaction.amount, 0) || 0
+    const depositsLastWeekResult = await query(`
+      SELECT COALESCE(SUM(amount), 0) as total
+      FROM transactions 
+      WHERE type = 'deposit' AND status = 'completed' AND created_at < $1
+    `, [lastWeek.toISOString()])
+    const totalDepositsLastWeek = parseFloat(depositsLastWeekResult.rows[0]?.total || '0')
 
     // Рассчитываем дельты
-    const usersDelta = usersLastWeek ? Math.round(((totalUsers! - usersLastWeek) / usersLastWeek) * 100) : 0
-    const depositsDelta = totalDepositsLastWeek
+    const usersDelta = usersLastWeek > 0 ? Math.round(((totalUsers - usersLastWeek) / usersLastWeek) * 100) : 0
+    const depositsDelta = totalDepositsLastWeek > 0
       ? Math.round(((totalDeposits - totalDepositsLastWeek) / totalDepositsLastWeek) * 100)
       : 0
 

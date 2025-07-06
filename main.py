@@ -6,7 +6,11 @@ This script directly starts the Next.js server on port 5000
 import subprocess
 import sys
 import os
+import requests
+import threading
+import time
 from pathlib import Path
+from flask import Flask, Response, request as flask_request
 
 def check_node_modules():
     """Check if node_modules exists"""
@@ -66,30 +70,83 @@ nextjs_thread = threading.Thread(target=start_nextjs_background)
 nextjs_thread.daemon = True
 nextjs_thread.start()
 
-@app.route('/')
+@app.route('/', methods=['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'])
 def root():
     return proxy_to_nextjs('/')
 
-@app.route('/<path:path>')
+@app.route('/<path:path>', methods=['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'])
 def proxy_all(path):
     return proxy_to_nextjs(f'/{path}')
 
 def proxy_to_nextjs(path):
     """Proxy requests to Next.js server"""
     try:
-        import requests
-        from flask import Response, request as flask_request
         
         url = f"http://localhost:3001{path}"
         
-        # Forward the request with all headers and parameters
-        response = requests.get(
-            url,
-            params=dict(flask_request.args),
-            headers={k: v for k, v in flask_request.headers if k.lower() != 'host'},
-            timeout=30,
-            allow_redirects=True
-        )
+        # Prepare headers
+        headers = {k: v for k, v in flask_request.headers if k.lower() != 'host'}
+        
+        # Forward the request with the correct method
+        if flask_request.method == 'GET':
+            response = requests.get(
+                url,
+                params=dict(flask_request.args),
+                headers=headers,
+                timeout=30,
+                allow_redirects=True
+            )
+        elif flask_request.method == 'POST':
+            response = requests.post(
+                url,
+                params=dict(flask_request.args),
+                headers=headers,
+                data=flask_request.get_data(),
+                timeout=30,
+                allow_redirects=True
+            )
+        elif flask_request.method == 'PUT':
+            response = requests.put(
+                url,
+                params=dict(flask_request.args),
+                headers=headers,
+                data=flask_request.get_data(),
+                timeout=30,
+                allow_redirects=True
+            )
+        elif flask_request.method == 'DELETE':
+            response = requests.delete(
+                url,
+                params=dict(flask_request.args),
+                headers=headers,
+                timeout=30,
+                allow_redirects=True
+            )
+        elif flask_request.method == 'PATCH':
+            response = requests.patch(
+                url,
+                params=dict(flask_request.args),
+                headers=headers,
+                data=flask_request.get_data(),
+                timeout=30,
+                allow_redirects=True
+            )
+        elif flask_request.method == 'OPTIONS':
+            response = requests.options(
+                url,
+                params=dict(flask_request.args),
+                headers=headers,
+                timeout=30,
+                allow_redirects=True
+            )
+        else:
+            response = requests.get(
+                url,
+                params=dict(flask_request.args),
+                headers=headers,
+                timeout=30,
+                allow_redirects=True
+            )
         
         # Create response with proper headers
         excluded_headers = ['content-encoding', 'content-length', 'transfer-encoding', 'connection']

@@ -1,3 +1,7 @@
 {
+  "/api/user-activity/route": "app/api/user-activity/route.js",
+  "/api/new-users/route": "app/api/new-users/route.js",
+  "/api/admin/hero-settings/route": "app/api/admin/hero-settings/route.js",
+  "/api/statistics/route": "app/api/statistics/route.js",
   "/page": "app/page.js"
 }
