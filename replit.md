@@ -1,80 +1,115 @@
-# ZIP Archive Extractor
+# Investpromax Project Setup
 
 ## Overview
 
-This is a Flask-based web application that allows users to upload and extract ZIP archives through a web interface. The application provides a simple drag-and-drop interface for file uploads and displays the extracted contents. It's designed as a utility tool for easily handling ZIP files in a web environment.
+InvestPro - это современная инвестиционная платформа, построенная на Next.js 15 с использованием TypeScript и PostgreSQL в качестве базы данных. Платформа предоставляет полный функционал для управления инвестициями, пользователями и администрирования. Проект полностью переустановлен из архива и готов к работе.
 
 ## System Architecture
 
-The application follows a simple client-server architecture:
+### Setup and Import Layer
+- **Setup Scripts**: Automated project import and configuration management
+- **Environment Verification**: Pre-flight checks for system compatibility
+- **Configuration Management**: Centralized configuration handling with defaults
 
-- **Frontend**: HTML templates with Bootstrap for styling and JavaScript for interactive features
-- **Backend**: Flask web framework handling file uploads and ZIP extraction
-- **File Storage**: Local file system for temporary storage of uploaded and extracted files
-- **No Database**: The application is stateless and doesn't persist data between sessions
+### Core Components
+- **Project Importer**: Git-based repository cloning and project initialization
+- **Environment Checker**: System requirements validation (Python version, Git availability)
+- **Configuration Manager**: JSON-based configuration with environment variable support
+- **Server Starter**: Multi-platform server detection and startup automation
 
 ## Key Components
 
-### Backend (Flask)
-- **app.py**: Main application file containing Flask routes and business logic
-- **main.py**: Application entry point for running the Flask server
-- File upload handling with validation and security measures
-- ZIP extraction functionality with error handling
-- Session-based flash messaging for user feedback
+### Configuration System
+- **File**: `config.py` - Centralized configuration management
+- **Purpose**: Manages application settings with JSON-based storage and environment variable fallbacks
+- **Features**: Default configuration generation, file-based persistence, environment-aware settings
 
-### Frontend
-- **templates/index.html**: Main user interface with drag-and-drop upload area
-- **static/css/style.css**: Custom styling for the application
-- **static/js/upload.js**: Client-side JavaScript for file handling and progress tracking
-- Bootstrap framework for responsive design and dark theme support
+### Import and Setup
+- **Files**: `setup.py`, `import_project.py`
+- **Purpose**: Automated project cloning from GitHub repository
+- **Features**: Git repository management, backup creation, multi-stage import process
 
-### Security Features
-- File extension validation (ZIP files only)
-- File size limits (100MB maximum)
-- Secure filename handling using Werkzeug utilities
-- ZIP file integrity validation
+### Environment Validation
+- **File**: `check_environment.py`
+- **Purpose**: System compatibility verification
+- **Features**: Python version checking, Git availability validation, dependency verification
+
+### Server Management
+- **File**: `start_server.py`
+- **Purpose**: Intelligent server detection and startup
+- **Features**: Multi-language support (Python/Node.js), automatic main file detection
 
 ## Data Flow
 
-1. User accesses the web interface
-2. User selects or drags a ZIP file to the upload area
-3. Client-side validation checks file type and size
-4. File is uploaded to the server via POST request
-5. Server validates the file and extracts contents
-6. Extracted files are stored in the local file system
-7. User receives feedback about the operation status
-8. File listing is displayed to the user
+1. **Initialization**: User runs `setup.py` to begin project import
+2. **Environment Check**: System validates Python version and Git availability
+3. **Repository Clone**: Project imports Investpromax from GitHub
+4. **Configuration**: Default settings are applied with environment customization
+5. **Server Detection**: System identifies and prepares appropriate server startup
+6. **Deployment**: Application launches with configured parameters
 
 ## External Dependencies
 
-### Python Packages
-- **Flask**: Web framework for handling HTTP requests and responses
-- **Werkzeug**: Utilities for secure file handling and web development
-- **zipfile**: Built-in Python module for ZIP archive handling
-- **os**: Built-in module for file system operations
+### GitHub Integration
+- **Repository**: `https://github.com/KHUDOYDOD/Investpromax.git`
+- **Method**: Git-based cloning and synchronization
+- **Backup Strategy**: Automatic backup creation before import
 
-### Frontend Dependencies
-- **Bootstrap**: CSS framework for responsive design and components
-- **Font Awesome**: Icon library for enhanced UI elements
-- **Custom CSS/JS**: Application-specific styling and functionality
+### Python Dependencies
+- **GitPython**: Git repository management
+- **Requests**: HTTP client for API interactions
+- **Standard Library**: JSON, subprocess, pathlib for core functionality
+
+### System Requirements
+- **Python**: 3.7+ (configured for 3.11)
+- **Git**: Required for repository operations
+- **Operating System**: Cross-platform support (Unix/Windows)
 
 ## Deployment Strategy
 
-The application is configured for deployment on Replit:
-- Uses environment variables for configuration (SESSION_SECRET)
-- Runs on host '0.0.0.0' and port 5000
-- Debug mode enabled for development
-- Automatic directory creation for upload and extraction folders
+### Development Environment
+- **Database**: SQLite default with PostgreSQL support
+- **Server**: Development server with hot reload
+- **Configuration**: Debug mode enabled, permissive CORS settings
 
-### Configuration
-- Upload folder: 'uploads'
-- Extract folder: 'extracted'
-- Maximum file size: 100MB
-- Allowed file types: ZIP archives only
+### Configuration Flexibility
+- **Environment Variables**: Support for DATABASE_URL, SECRET_KEY, JWT_SECRET
+- **Port Configuration**: Separate frontend (5000) and backend (8000) ports
+- **Security**: Configurable secrets with development defaults
+
+### Multi-Stage Setup
+1. **Pre-flight Checks**: Environment validation
+2. **Repository Import**: Git-based project cloning
+3. **Configuration Application**: Settings initialization
+4. **Server Preparation**: Application startup preparation
+
+## Recent Changes
+
+✓ Создано простое Flask веб-приложение для загрузки ZIP архивов
+✓ Установлен пользователем архив с инвестиционной платформой  
+✓ Извлечен проект Next.js из папки invest
+✓ Настроена PostgreSQL база данных для инвестиционной платформы
+✓ Установлены все зависимости Node.js для Next.js приложения
+✓ Запущен Next.js сервер на порту 3001 с Flask прокси на порту 5000  
 
 ## Changelog
-- July 06, 2025. Initial setup
+
+\`\`\`
+Changelog:
+- June 24, 2025. Initial setup and import from GitHub
+- June 24, 2025. Database setup and authentication system implementation
+\`\`\`
 
 ## User Preferences
 
+\`\`\`
 Preferred communication style: Simple, everyday language.
+\`\`\`
+
+## Technical Notes
+
+- The system is designed to work with both Python and Node.js applications
+- Database configuration supports SQLite for development with easy PostgreSQL migration
+- Security settings use development-friendly defaults that should be changed for production
+- The import system creates automatic backups to prevent data loss during setup
+- Server detection is intelligent and can identify common application entry points
