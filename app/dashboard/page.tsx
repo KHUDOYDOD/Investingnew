@@ -203,8 +203,8 @@ function DashboardContent() {
 
   const quickActions = [
     {
-      title: "Пополнить баланс",
-      subtitle: "Отправить запрос на пополнение",
+      title: "💰 Пополнить счёт",
+      subtitle: "Быстрое пополнение баланса",
       icon: <ArrowDownToLine className="h-6 w-6" />,
       color: "from-green-500 to-emerald-600",
       action: () => {
@@ -213,8 +213,8 @@ function DashboardContent() {
       limit: "Мин. $50",
     },
     {
-      title: "Вывод средств",
-      subtitle: "Запросить вывод прибыли",
+      title: "💎 Получить прибыль",
+      subtitle: "Вывод заработанных средств",
       icon: <ArrowUpFromLine className="h-6 w-6" />,
       color: "from-red-500 to-pink-600",
       action: () => {
@@ -223,8 +223,8 @@ function DashboardContent() {
       limit: "24/7 доступно",
     },
     {
-      title: "Пригласить друзей",
-      subtitle: "Получайте бонусы за рефералов",
+      title: "🤝 Пригласить друзей",
+      subtitle: "Реферальная программа",
       icon: <Users className="h-6 w-6" />,
       color: "from-purple-500 to-violet-600",
       action: () => {
@@ -233,8 +233,8 @@ function DashboardContent() {
       limit: "до 10%",
     },
     {
-      title: "Новая инвестиция",
-      subtitle: "Выберите план инвестирования",
+      title: "🚀 Начать зарабатывать",
+      subtitle: "Создать новую инвестицию",
       icon: <BarChart3 className="h-6 w-6" />,
       color: "from-orange-500 to-amber-600",
       action: () => {
@@ -243,8 +243,8 @@ function DashboardContent() {
       limit: "От $100",
     },
     {
-      title: "Мой профиль",
-      subtitle: "Управление личными данными",
+      title: "👤 Личные данные",
+      subtitle: "Настройки профиля",
       icon: <User className="h-6 w-6" />,
       color: "from-blue-500 to-cyan-600",
       action: () => {
@@ -460,19 +460,35 @@ function DashboardContent() {
               {quickActions.map((action, index) => (
                 <motion.div
                   key={index}
-                  whileHover={{ scale: 1.05, y: -5 }}
-                  whileTap={{ scale: 0.95 }}
+                  whileHover={{ 
+                    scale: 1.08, 
+                    y: -8,
+                    rotateY: 5,
+                    boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.5)"
+                  }}
+                  whileTap={{ scale: 0.92 }}
                   onClick={action.action}
-                  className={`bg-gradient-to-br ${action.color} p-6 rounded-2xl text-center cursor-pointer shadow-lg hover:shadow-2xl transition-all duration-300 border border-white/10 backdrop-blur-sm`}
+                  className={`bg-gradient-to-br ${action.color} p-6 rounded-3xl text-center cursor-pointer shadow-2xl hover:shadow-blue-500/25 transition-all duration-500 border border-white/20 backdrop-blur-xl relative overflow-hidden group`}
                 >
-                  <div className="text-white mb-4 flex justify-center transform transition-transform duration-300 hover:scale-110">
-                    {action.icon}
+                  {/* Animated background effect */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/10 to-white/0 transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
+                  
+                  {/* Glow effect */}
+                  <div className="absolute inset-0 rounded-3xl bg-gradient-to-r from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                  
+                  <div className="relative z-10">
+                    <div className="text-white mb-4 flex justify-center transform transition-all duration-500 group-hover:scale-125 group-hover:rotate-12">
+                      {action.icon}
+                    </div>
+                    <h3 className="text-white font-bold text-sm mb-2 group-hover:text-yellow-200 transition-colors duration-300">{action.title}</h3>
+                    <p className="text-white/80 text-xs mb-3 leading-relaxed group-hover:text-white/90 transition-colors duration-300">{action.subtitle}</p>
+                    <div className="bg-white/20 group-hover:bg-white/30 rounded-full px-3 py-1 transition-all duration-300 border border-white/10">
+                      <p className="text-white/90 group-hover:text-white text-xs font-medium">{action.limit}</p>
+                    </div>
                   </div>
-                  <h3 className="text-white font-semibold text-sm mb-2">{action.title}</h3>
-                  <p className="text-white/80 text-xs mb-3 leading-relaxed">{action.subtitle}</p>
-                  <div className="bg-white/20 rounded-full px-3 py-1">
-                    <p className="text-white/90 text-xs font-medium">{action.limit}</p>
-                  </div>
+                  
+                  {/* Corner decoration */}
+                  <div className="absolute top-2 right-2 w-2 h-2 bg-white/30 rounded-full group-hover:scale-150 group-hover:bg-yellow-300 transition-all duration-300"></div>
                 </motion.div>
               ))}
             </motion.div>

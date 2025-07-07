@@ -93,6 +93,7 @@ export default function ProfilePage() {
         balance: parseFloat(data.user.balance || 0),
         total_invested: parseFloat(data.user.total_invested || 0),
         total_earned: parseFloat(data.user.total_earned || 0),
+        referral_count: parseInt(data.user.referral_count || 0),
         profile: {
           phone: data.user.phone || "",
           country: data.user.country || "",
@@ -317,11 +318,16 @@ export default function ProfilePage() {
                 </Card>
               </motion.div>
 
-              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7 }}>
-                <Card className="bg-gradient-to-r from-purple-600/20 to-pink-600/20 backdrop-blur-xl border-purple-400/30 text-white">
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }} 
+                animate={{ opacity: 1, y: 0 }} 
+                transition={{ delay: 0.7 }}
+                whileHover={{ scale: 1.05, rotateY: 5 }}
+              >
+                <Card className="bg-gradient-to-r from-purple-600/20 to-pink-600/20 backdrop-blur-xl border-purple-400/30 text-white hover:border-purple-300/50 transition-all duration-300">
                   <CardContent className="p-4 text-center">
                     <Award className="w-8 h-8 mx-auto mb-2 text-purple-400" />
-                    <p className="text-lg font-bold">{user.referral_code}</p>
+                    <p className="text-lg font-bold">{user.referral_code || 'N/A'}</p>
                     <p className="text-sm text-white/70">Реф. код</p>
                   </CardContent>
                 </Card>
