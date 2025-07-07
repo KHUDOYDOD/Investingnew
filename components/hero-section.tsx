@@ -5,11 +5,13 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { useSettings } from "@/components/settings-provider"
 
-import { TrendingUp, Shield, Users, DollarSign, ArrowRight, Play } from "lucide-react"
+import { TrendingUp, Shield, Users, DollarSign, ArrowRight, Play, BarChart3, Wallet } from "lucide-react"
 
 export function HeroSection() {
   const { siteSettings, loading } = useSettings()
   const [mounted, setMounted] = useState(false)
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [userData, setUserData] = useState<any>(null)
 
   const defaultHeroSettings = {
     enabled: true,
@@ -41,6 +43,24 @@ export function HeroSection() {
   useEffect(() => {
     setMounted(true)
 
+    // Check authentication status
+    const checkAuth = () => {
+      const token = localStorage.getItem("authToken")
+      const userId = localStorage.getItem("userId")
+      const userDataStr = localStorage.getItem("userData")
+      
+      if (token && userId) {
+        setIsAuthenticated(true)
+        if (userDataStr) {
+          try {
+            setUserData(JSON.parse(userDataStr))
+          } catch (error) {
+            console.error("Error parsing user data:", error)
+          }
+        }
+      }
+    }
+
     // Load hero settings from admin panel
     const loadHeroSettings = async () => {
       try {
@@ -57,7 +77,23 @@ export function HeroSection() {
       }
     }
 
+    checkAuth()
     loadHeroSettings()
+
+    // Listen for auth changes
+    const handleStorageChange = () => {
+      checkAuth()
+    }
+
+    // Check auth status periodically for real-time updates
+    const authInterval = setInterval(checkAuth, 5000)
+
+    window.addEventListener("storage", handleStorageChange)
+    
+    return () => {
+      window.removeEventListener("storage", handleStorageChange)
+      clearInterval(authInterval)
+    }
   }, [])
 
   if (!mounted || loading) {
@@ -199,26 +235,108 @@ export function HeroSection() {
 
           {/* CTA Buttons */}
           {heroSettings.show_buttons && (
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-              <Link href={heroSettings.button1_link}>
-                <Button
-                  size="lg"
-                  className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-4 text-lg font-medium rounded-xl shadow-2xl hover:shadow-blue-500/25 transform hover:scale-105 transition-all duration-300 group"
-                >
-                  {heroSettings.button1_text}
-                  <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
-                </Button>
-              </Link>
-              <Link href={heroSettings.button2_link}>
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="border-2 border-slate-600 bg-slate-800/50 backdrop-blur-sm text-white hover:bg-slate-700 px-8 py-4 text-lg font-medium rounded-xl transform hover:scale-105 transition-all duration-300 group"
-                >
-                  <Play className="mr-2 h-5 w-5" />
-                  {heroSettings.button2_text}
-                </Button>
-              </Link>
+            <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
+              {isAuthenticated ? (
+                // Buttons for authenticated users
+                <>
+                  <Link href="/dashboard">
+                    <Button
+                      size="lg"
+                      className="relative overflow-hidden bg-gradient-to-r from-emerald-500 via-blue-500 to-purple-600 hover:from-emerald-600 hover:via-blue-600 hover:to-purple-700 text-white px-10 py-5 text-lg font-bold rounded-2xl shadow-2xl hover:shadow-emerald-500/25 transform hover:scale-110 transition-all duration-500 group border-2 border-white/20"
+                    >
+                      {/* Animated background overlay */}
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
+                      
+                      {/* Pulsing glow effect */}
+                      <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-emerald-400/30 to-purple-400/30 blur-xl group-hover:blur-2xl transition-all duration-500 opacity-0 group-hover:opacity-100"></div>
+                      
+                      <div className="relative z-10 flex items-center">
+                        <BarChart3 className="mr-3 h-6 w-6 group-hover:rotate-12 group-hover:scale-125 transition-all duration-500" />
+                        Личный кабинет
+                        <ArrowRight className="ml-3 h-6 w-6 group-hover:translate-x-2 group-hover:scale-125 transition-all duration-500" />
+                      </div>
+                      
+                      {/* Corner sparkles */}
+                      <div className="absolute top-2 right-2 w-2 h-2 bg-white/60 rounded-full group-hover:scale-150 group-hover:bg-yellow-300 transition-all duration-300 animate-pulse"></div>
+                      <div className="absolute bottom-2 left-2 w-1.5 h-1.5 bg-white/40 rounded-full group-hover:scale-150 group-hover:bg-cyan-300 transition-all duration-300 animate-pulse delay-200"></div>
+                    </Button>
+                  </Link>
+                  
+                  <Link href="/dashboard/investments">
+                    <Button
+                      size="lg"
+                      variant="outline"
+                      className="relative overflow-hidden border-3 border-gradient-to-r from-cyan-400 to-blue-500 bg-slate-900/80 backdrop-blur-xl text-white hover:bg-slate-800/90 px-10 py-5 text-lg font-bold rounded-2xl transform hover:scale-110 transition-all duration-500 group shadow-xl hover:shadow-cyan-500/25 border-2 border-cyan-400/50 hover:border-cyan-300"
+                    >
+                      {/* Animated border glow */}
+                      <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-cyan-400/20 via-blue-500/20 to-purple-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                      
+                      {/* Moving light effect */}
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-cyan-400/30 to-transparent transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1200"></div>
+                      
+                      <div className="relative z-10 flex items-center">
+                        <Wallet className="mr-3 h-6 w-6 group-hover:rotate-12 group-hover:scale-125 transition-all duration-500" />
+                        Начать инвестировать
+                        <TrendingUp className="ml-3 h-6 w-6 group-hover:translate-y-[-4px] group-hover:scale-125 transition-all duration-500" />
+                      </div>
+                      
+                      {/* Floating particles effect */}
+                      <div className="absolute top-1 right-3 w-1 h-1 bg-cyan-400 rounded-full group-hover:scale-150 group-hover:bg-yellow-400 transition-all duration-300 animate-bounce"></div>
+                      <div className="absolute bottom-1 left-3 w-1 h-1 bg-blue-400 rounded-full group-hover:scale-150 group-hover:bg-green-400 transition-all duration-300 animate-bounce delay-150"></div>
+                    </Button>
+                  </Link>
+                </>
+              ) : (
+                // Buttons for non-authenticated users (original)
+                <>
+                  <Link href={heroSettings.button1_link}>
+                    <Button
+                      size="lg"
+                      className="relative overflow-hidden bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-10 py-5 text-lg font-bold rounded-2xl shadow-2xl hover:shadow-blue-500/25 transform hover:scale-110 transition-all duration-500 group border-2 border-white/20"
+                    >
+                      {/* Animated background overlay */}
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
+                      
+                      {/* Pulsing glow effect */}
+                      <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-blue-400/30 to-purple-400/30 blur-xl group-hover:blur-2xl transition-all duration-500 opacity-0 group-hover:opacity-100"></div>
+                      
+                      <div className="relative z-10 flex items-center">
+                        <DollarSign className="mr-3 h-6 w-6 group-hover:rotate-12 group-hover:scale-125 transition-all duration-500" />
+                        {heroSettings.button1_text}
+                        <ArrowRight className="ml-3 h-6 w-6 group-hover:translate-x-2 group-hover:scale-125 transition-all duration-500" />
+                      </div>
+                      
+                      {/* Corner sparkles */}
+                      <div className="absolute top-2 right-2 w-2 h-2 bg-white/60 rounded-full group-hover:scale-150 group-hover:bg-yellow-300 transition-all duration-300 animate-pulse"></div>
+                      <div className="absolute bottom-2 left-2 w-1.5 h-1.5 bg-white/40 rounded-full group-hover:scale-150 group-hover:bg-cyan-300 transition-all duration-300 animate-pulse delay-200"></div>
+                    </Button>
+                  </Link>
+                  
+                  <Link href={heroSettings.button2_link}>
+                    <Button
+                      size="lg"
+                      variant="outline"
+                      className="relative overflow-hidden border-3 border-gradient-to-r from-slate-400 to-slate-600 bg-slate-800/80 backdrop-blur-xl text-white hover:bg-slate-700/90 px-10 py-5 text-lg font-bold rounded-2xl transform hover:scale-110 transition-all duration-500 group shadow-xl hover:shadow-slate-500/25 border-2 border-slate-600/50 hover:border-slate-400"
+                    >
+                      {/* Animated border glow */}
+                      <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-slate-400/20 via-slate-500/20 to-slate-600/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                      
+                      {/* Moving light effect */}
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1200"></div>
+                      
+                      <div className="relative z-10 flex items-center">
+                        <Play className="mr-3 h-6 w-6 group-hover:scale-125 transition-all duration-500" />
+                        {heroSettings.button2_text}
+                        <Shield className="ml-3 h-6 w-6 group-hover:scale-125 transition-all duration-500" />
+                      </div>
+                      
+                      {/* Floating particles effect */}
+                      <div className="absolute top-1 right-3 w-1 h-1 bg-slate-400 rounded-full group-hover:scale-150 group-hover:bg-blue-400 transition-all duration-300 animate-bounce"></div>
+                      <div className="absolute bottom-1 left-3 w-1 h-1 bg-slate-500 rounded-full group-hover:scale-150 group-hover:bg-purple-400 transition-all duration-300 animate-bounce delay-150"></div>
+                    </Button>
+                  </Link>
+                </>
+              )}
             </div>
           )}
 
