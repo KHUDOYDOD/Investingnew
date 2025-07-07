@@ -20,9 +20,9 @@ export async function GET(request: NextRequest) {
       SELECT 
         id, email, full_name as name, balance, total_invested as "totalInvested",
         total_earned as "totalProfit", role_id, 
-        (SELECT COUNT(*) FROM users WHERE referral_code = $1) as "referralCount"
+        (SELECT COUNT(*) FROM users WHERE referral_code = $1::text) as "referralCount"
       FROM users 
-      WHERE id = $1
+      WHERE id = $1::uuid
     `,
       [userId],
     )
@@ -44,7 +44,7 @@ export async function GET(request: NextRequest) {
         ip.duration_days
       FROM investments i
       LEFT JOIN investment_plans ip ON i.plan_id = ip.id
-      WHERE i.user_id = $1 AND i.status = 'active'
+      WHERE i.user_id = $1::uuid AND i.status = 'active'
       ORDER BY i.created_at DESC
     `,
       [userId],
@@ -62,10 +62,10 @@ export async function GET(request: NextRequest) {
     const transactionsResult = await query(
       `
       SELECT 
-        id, type, amount, status, created_at, description, payment_method,
+        id, type, amount, status, created_at, description, method as payment_method,
         (SELECT name FROM investment_plans WHERE id = plan_id) as plan_name
       FROM transactions
-      WHERE user_id = $1
+      WHERE user_id = $1::uuid
       ORDER BY created_at DESC
       LIMIT 10
     `,

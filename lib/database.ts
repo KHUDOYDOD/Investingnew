@@ -146,7 +146,7 @@ export async function createUser(userData: {
     INSERT INTO users (email, full_name, password_hash, phone, country, balance, total_invested, total_earned)
     VALUES ($1, $2, $3, $4, $5, 0, 0, 0)
     RETURNING *
-  `, [userData.email, userData.full_name, userData.password_hash, userData.phone, userData.country])
+  `, [userData.email, userData.full_name, userData.password_hash, userData.phone || null, userData.country || 'RU'])
   
   return result.rows[0]
 }
