@@ -1,8 +1,8 @@
 {
   "/api/new-users/route": "app/api/new-users/route.js",
-  "/api/statistics/route": "app/api/statistics/route.js",
   "/api/user-activity/route": "app/api/user-activity/route.js",
-  "/api/admin/hero-settings/route": "app/api/admin/hero-settings/route.js",
-  "/page": "app/page.js",
+  "/api/dashboard/all/route": "app/api/dashboard/all/route.js",
+  "/api/user/profile/route": "app/api/user/profile/route.js",
+  "/dashboard/page": "app/dashboard/page.js",
   "/dashboard/profile/page": "app/dashboard/profile/page.js"
 }
