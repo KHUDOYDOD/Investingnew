@@ -106,7 +106,13 @@ export function InvestmentPlansSelector() {
   const loadPlans = async () => {
     try {
       setLoading(true)
-      const response = await fetch("/api/investment-plans")
+      const token = localStorage.getItem('authToken')
+      const response = await fetch("/api/investment-plans", {
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token && { 'Authorization': `Bearer ${token}` }),
+        },
+      })
 
       if (!response.ok) {
         console.warn("Failed to fetch investment plans, using demo data")
@@ -171,6 +177,20 @@ export function InvestmentPlansSelector() {
     setIsInvesting(true)
 
     try {
+      const token = localStorage.getItem('authToken')
+      if (!token) {
+        toast.error('Токен авторизации не найден')
+        return
+      }
+
+      const response = await fetch('/api/investments', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ planId: selectedPlan, amount }),
+      })
       // Симуляция создания инвестиции
       await new Promise((resolve) => setTimeout(resolve, 2000))
 

@@ -30,12 +30,23 @@ export function InvestmentsList() {
     try {
       setLoading(true)
       setError(null)
-      
-      const response = await fetch('/api/dashboard/investments')
+
+      const token = localStorage.getItem('authToken')
+      if (!token) {
+        setError('Токен авторизации не найден')
+        return
+      }
+
+      const response = await fetch(`/api/dashboard/investments?userId=${currentUserId}`, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+      })
       if (!response.ok) {
         throw new Error('Failed to load investments')
       }
-      
+
       const data = await response.json()
       if (data.success) {
         setInvestments(data.investments)
@@ -96,7 +107,7 @@ export function InvestmentsList() {
           </div>
           <p className="text-red-400">{error}</p>
           <Button
-            onClick={fetchInvestments}
+            onClick={loadInvestments}
             variant="outline"
             className="border-gray-800 text-gray-400 hover:bg-gray-800/50"
           >

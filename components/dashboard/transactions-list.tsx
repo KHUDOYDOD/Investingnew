@@ -30,21 +30,22 @@ export function TransactionsList({ limit = 10 }: TransactionsListProps) {
       fetchTransactions()
   }, [limit])
 
-  const fetchTransactions = async () => {
+const fetchTransactions = async () => {
     try {
       setLoading(true)
       setError(null)
 
-      const token = localStorage.getItem('token')
+      const token = localStorage.getItem('authToken')
       if (!token) {
-        setError('Токен не найден')
+        setError('Токен авторизации не найден')
         return
       }
 
-      const response = await fetch('/api/dashboard/transactions', {
+      const response = await fetch(`/api/dashboard/transactions?userId=${userId}`, {
         headers: {
-          'Authorization': `Bearer ${token}`
-        }
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
       })
       const data = await response.json()
 

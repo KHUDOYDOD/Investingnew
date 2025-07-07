@@ -31,7 +31,7 @@ export async function GET() {
     })
   } catch (error) {
     console.error("Error loading investment plans:", error)
-    
+
     // Возвращаем базовые планы как fallback
     const fallbackPlans = [
       {

@@ -4,19 +4,17 @@ import jwt from 'jsonwebtoken'
 
 export async function POST(request: NextRequest) {
   try {
-    // Получаем токен из заголовков
     const authHeader = request.headers.get('authorization')
     let token: string | null = null
-    
+
     if (authHeader && authHeader.startsWith('Bearer ')) {
       token = authHeader.substring(7)
     }
-    
+
     if (!token) {
       return NextResponse.json({ error: 'Токен не предоставлен' }, { status: 401 })
     }
 
-    // Верифицируем токен
     let decoded: any
     try {
       decoded = jwt.verify(token, process.env.NEXTAUTH_SECRET || 'fallback-secret')
@@ -24,106 +22,85 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Недействительный токен' }, { status: 401 })
     }
 
-    const { plan_id, amount } = await request.json()
+    const { planId, amount } = await request.json()
 
-    if (!plan_id || !amount || amount <= 0) {
-      return NextResponse.json({ error: 'Неверные данные для инвестирования' }, { status: 400 })
+    if (!planId || !amount) {
+      return NextResponse.json({ error: 'Все поля обязательны' }, { status: 400 })
     }
 
-    console.log('Creating investment for user:', decoded.userId, 'plan:', plan_id, 'amount:', amount)
-
-    // Проверяем план инвестирования
+    // Получаем план инвестиций
     const planResult = await query(
       'SELECT * FROM investment_plans WHERE id = $1 AND is_active = true',
-      [plan_id]
+      [planId]
     )
 
     if (planResult.rows.length === 0) {
-      return NextResponse.json({ error: 'План инвестирования не найден' }, { status: 404 })
+      return NextResponse.json({ error: 'План инвестиций не найден' }, { status: 404 })
     }
 
     const plan = planResult.rows[0]
 
-    // Проверяем минимальную сумму
-    if (amount < plan.min_amount) {
+    // Проверяем минимальную и максимальную сумму
+    if (amount < plan.min_amount || amount > plan.max_amount) {
       return NextResponse.json({ 
-        error: `Минимальная сумма инвестирования: $${plan.min_amount}` 
-      }, { status: 400 })
-    }
-
-    // Проверяем максимальную сумму
-    if (plan.max_amount && amount > plan.max_amount) {
-      return NextResponse.json({ 
-        error: `Максимальная сумма инвестирования: $${plan.max_amount}` 
+        error: `Сумма должна быть от $${plan.min_amount} до $${plan.max_amount}` 
       }, { status: 400 })
     }
 
     // Проверяем баланс пользователя
     const userResult = await query(
-      'SELECT balance FROM users WHERE id = $1',
+      'SELECT balance FROM users WHERE id = $1::uuid',
       [decoded.userId]
     )
 
-    const userBalance = parseFloat(userResult.rows[0]?.balance || '0')
+    if (userResult.rows.length === 0) {
+      return NextResponse.json({ error: 'Пользователь не найден' }, { status: 404 })
+    }
+
+    const userBalance = parseFloat(userResult.rows[0].balance)
     if (userBalance < amount) {
-      return NextResponse.json({ error: 'Недостаточно средств на балансе' }, { status: 400 })
+      return NextResponse.json({ error: 'Недостаточно средств' }, { status: 400 })
     }
 
-    // Начинаем транзакцию
-    await query('BEGIN')
+    // Создаем инвестицию
+    const startDate = new Date()
+    const endDate = new Date()
+    endDate.setDate(startDate.getDate() + plan.duration_days)
 
-    try {
-      // Создаем инвестицию
-      const investmentResult = await query(
-        `INSERT INTO investments (user_id, plan_id, amount, status, total_profit, daily_profit, start_date, end_date, created_at)
-         VALUES ($1, $2, $3, 'active', 0, 0, CURRENT_TIMESTAMP, $4, CURRENT_TIMESTAMP)
-         RETURNING *`,
-        [
-          decoded.userId,
-          plan_id,
-          amount,
-          new Date(Date.now() + plan.duration_days * 24 * 60 * 60 * 1000)
-        ]
-      )
+    const investmentResult = await query(
+      `INSERT INTO investments 
+       (user_id, plan_id, amount, status, start_date, end_date, daily_profit_rate, total_profit)
+       VALUES ($1::uuid, $2, $3, 'active', $4, $5, $6, 0)
+       RETURNING *`,
+      [decoded.userId, planId, amount, startDate, endDate, plan.daily_profit_rate]
+    )
 
-      // Создаем транзакцию
-      await query(
-        `INSERT INTO transactions (user_id, type, amount, status, description, payment_method, created_at)
-         VALUES ($1, 'investment', $2, 'completed', $3, 'balance', CURRENT_TIMESTAMP)`,
-        [
-          decoded.userId,
-          amount,
-          `Инвестирование в план "${plan.name}"`
-        ]
-      )
+    // Обновляем баланс пользователя
+    await query(
+      'UPDATE users SET balance = balance - $1, total_invested = total_invested + $1 WHERE id = $2::uuid',
+      [amount, decoded.userId]
+    )
 
-      // Списываем средства с баланса
-      await query(
-        'UPDATE users SET balance = balance - $1, total_invested = total_invested + $1 WHERE id = $2',
-        [amount, decoded.userId]
-      )
+    // Создаем транзакцию
+    await query(
+      `INSERT INTO transactions 
+       (user_id, type, amount, status, description, method, plan_id)
+       VALUES ($1::uuid, 'investment', $2, 'completed', $3, 'balance', $4)`,
+      [decoded.userId, amount, `Инвестиция в план "${plan.name}"`, planId]
+    )
 
-      await query('COMMIT')
-
-      console.log('Investment created successfully:', investmentResult.rows[0])
-
-      return NextResponse.json({
-        success: true,
-        investment: investmentResult.rows[0],
-        message: 'Инвестиция успешно создана',
-        voiceData: {
-          amount: amount,
-          planName: plan.name
-        }
-      })
-
-    } catch (error) {
-      await query('ROLLBACK')
-      throw error
-    }
+    return NextResponse.json({
+      success: true,
+      investment: investmentResult.rows[0],
+      message: 'Инвестиция создана успешно'
+    })
 
   } catch (error) {
-    console.error('Error creating investment:', error)
+    console.error('Investment creation error:', error)
     return NextResponse.json({ error: 'Ошибка создания инвестиции' }, { status: 500 })
   }
+}
+
+export async function GET(request: NextRequest) {
+  return NextResponse.json({ message: 'Method not allowed' }, { status: 405 });
 }
