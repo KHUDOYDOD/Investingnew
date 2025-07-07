@@ -1,8 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  experimental: {
-    serverComponentsExternalPackages: []
-  },
+  serverExternalPackages: [],
   images: {
     domains: ['placeholder.svg'],
     unoptimized: true
