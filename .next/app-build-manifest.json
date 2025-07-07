@@ -11,30 +11,40 @@
       "static/chunks/main-app.js",
       "static/chunks/app/page.js"
     ],
-    "/api/new-users/route": [
+    "/api/user/profile/route": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/api/new-users/route.js"
+      "static/chunks/app/api/user/profile/route.js"
     ],
-    "/api/user-activity/route": [
+    "/dashboard/profile/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/api/user-activity/route.js"
-    ],
-    "/api/statistics/route": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/api/statistics/route.js"
+      "static/chunks/app/dashboard/profile/page.js"
     ],
     "/api/admin/hero-settings/route": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/api/admin/hero-settings/route.js"
     ],
-    "/login/page": [
+    "/api/user-activity/route": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/login/page.js"
+      "static/chunks/app/api/user-activity/route.js"
+    ],
+    "/api/new-users/route": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/api/new-users/route.js"
+    ],
+    "/api/statistics/route": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/api/statistics/route.js"
+    ],
+    "/dashboard/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/dashboard/page.js"
     ],
     "/all-users/loading": [
       "static/chunks/webpack.js",
@@ -46,25 +56,30 @@
       "static/chunks/main-app.js",
       "static/chunks/app/all-users/page.js"
     ],
-    "/dashboard/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/dashboard/page.js"
-    ],
     "/api/dashboard/all/route": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/api/dashboard/all/route.js"
     ],
-    "/dashboard/profile/page": [
+    "/dashboard/transactions/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/dashboard/profile/page.js"
+      "static/chunks/app/dashboard/transactions/page.js"
     ],
-    "/api/user/profile/route": [
+    "/dashboard/investments/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/api/user/profile/route.js"
+      "static/chunks/app/dashboard/investments/page.js"
+    ],
+    "/api/investment-plans/route": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/api/investment-plans/route.js"
+    ],
+    "/api/dashboard/investments/route": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/api/dashboard/investments/route.js"
     ]
   }
 }
