@@ -7,11 +7,11 @@ export async function GET(request: NextRequest) {
     // Получаем токен из заголовков
     const authHeader = request.headers.get('authorization')
     let token: string | null = null
-    
+
     if (authHeader && authHeader.startsWith('Bearer ')) {
       token = authHeader.substring(7)
     }
-    
+
     if (!token) {
       return NextResponse.json({ error: 'Токен не предоставлен' }, { status: 401 })
     }
@@ -28,21 +28,22 @@ export async function GET(request: NextRequest) {
     const result = await query(
       `SELECT 
         i.id,
+        i.plan_name,
         i.amount,
+        i.daily_profit,
+        i.total_profit,
+        i.progress,
         i.status,
         i.start_date,
         i.end_date,
-        i.total_profit as profit_earned,
-        ip.name as plan_name,
-        ip.min_amount,
-        ip.max_amount,
-        ip.daily_profit_rate,
-        ip.duration_days,
-        i.created_at
+        i.days_left,
+        i.days_total,
+        ip.profit_rate,
+        ip.duration_days
       FROM investments i
-      JOIN investment_plans ip ON i.plan_id = ip.id
-      WHERE i.user_id = $1
-      ORDER BY i.created_at DESC`,
+      LEFT JOIN investment_plans ip ON i.plan_id = ip.id
+      WHERE i.user_id = $1::uuid AND i.status = 'active'
+      ORDER BY i.start_date DESC`,
       [decoded.userId]
     )
 

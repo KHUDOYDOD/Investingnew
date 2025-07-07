@@ -7,10 +7,19 @@ export async function GET() {
 
     const plansResult = await query(`
       SELECT 
-        id, name, description, min_amount, max_amount, 
-        daily_percent, duration, total_return, features, is_active
+        id, 
+        name, 
+        min_amount, 
+        max_amount, 
+        profit_rate, 
+        duration_days, 
+        total_return, 
+        is_active, 
+        description,
+        features,
+        created_at
       FROM investment_plans 
-      WHERE is_active = true
+      WHERE is_active = true 
       ORDER BY min_amount ASC
     `)
 

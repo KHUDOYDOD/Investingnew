@@ -41,7 +41,7 @@ const fetchTransactions = async () => {
         return
       }
 
-      const response = await fetch(`/api/dashboard/transactions?userId=${userId}`, {
+      const response = await fetch('/api/dashboard/transactions', {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,

@@ -22,16 +22,27 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Недействительный токен' }, { status: 401 })
     }
 
-    const { planId, amount } = await request.json()
+    const { userId, planId, amount, paymentMethod } = await request.json()
 
-    if (!planId || !amount) {
+    if (!userId || !planId || !amount || !paymentMethod) {
       return NextResponse.json({ error: 'Все поля обязательны' }, { status: 400 })
+    }
+
+    // Преобразуем planId в число если это строка
+    const numericPlanId = typeof planId === 'string' && planId.startsWith('plan-') 
+      ? parseInt(planId.replace('plan-', ''), 10)
+      : parseInt(planId, 10)
+
+    if (isNaN(numericPlanId)) {
+      return NextResponse.json({ error: 'Неверный ID плана' }, { status: 400 })
     }
 
     // Получаем план инвестиций
     const planResult = await query(
-      'SELECT * FROM investment_plans WHERE id = $1 AND is_active = true',
-      [planId]
+      `SELECT id, name, min_amount, max_amount, profit_rate, duration_days
+       FROM investment_plans 
+       WHERE id = $1 AND is_active = true`,
+      [numericPlanId]
     )
 
     if (planResult.rows.length === 0) {
@@ -62,31 +73,39 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Недостаточно средств' }, { status: 400 })
     }
 
+    // Рассчитываем параметры инвестиции
+    const plan = planResult.rows[0]
+    const dailyProfitRate = parseFloat(plan.profit_rate)
+    const duration = parseInt(plan.duration_days)
+    const dailyProfit = (amount * dailyProfitRate) / 100
+    const totalProfit = dailyProfit * duration
+    const endDate = new Date()
+    endDate.setDate(endDate.getDate() + duration)
+
     // Создаем инвестицию
     const startDate = new Date()
-    const endDate = new Date()
-    endDate.setDate(startDate.getDate() + plan.duration_days)
+    
 
     const investmentResult = await query(
       `INSERT INTO investments 
-       (user_id, plan_id, amount, status, start_date, end_date, daily_profit_rate, total_profit)
-       VALUES ($1::uuid, $2, $3, 'active', $4, $5, $6, 0)
+       (user_id, plan_id, amount, status, start_date, end_date, daily_profit, total_profit, duration)
+       VALUES ($1::uuid, $2, $3, 'active', $4, $5, $6, $7, $8)
        RETURNING *`,
-      [decoded.userId, planId, amount, startDate, endDate, plan.daily_profit_rate]
+      [userId, numericPlanId, amount, startDate, endDate, dailyProfit, totalProfit, duration]
     )
 
     // Обновляем баланс пользователя
     await query(
       'UPDATE users SET balance = balance - $1, total_invested = total_invested + $1 WHERE id = $2::uuid',
-      [amount, decoded.userId]
+      [amount, userId]
     )
 
     // Создаем транзакцию
     await query(
       `INSERT INTO transactions 
        (user_id, type, amount, status, description, method, plan_id)
-       VALUES ($1::uuid, 'investment', $2, 'completed', $3, 'balance', $4)`,
-      [decoded.userId, amount, `Инвестиция в план "${plan.name}"`, planId]
+       VALUES ($1::uuid, 'investment', $2, 'completed', $3, $4, $5)`,
+      [userId, 'investment', amount, 'completed', `Инвестиция в план "${plan.name}"`, paymentMethod, numericPlanId]
     )
 
     return NextResponse.json({
