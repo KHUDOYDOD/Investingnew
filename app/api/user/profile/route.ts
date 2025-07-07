@@ -14,7 +14,7 @@ export async function GET(request: Request) {
     const result = await query(
       `SELECT 
         id, email, full_name, balance, total_invested, total_earned, 
-        phone, country, city, bio, avatar_url, created_at, role_id,
+        phone, country, created_at, role_id,
         referral_code,
         (SELECT COUNT(*) FROM users WHERE referral_code = u.referral_code AND id != u.id) as referral_count
       FROM users u
@@ -37,12 +37,15 @@ export async function GET(request: Request) {
       referral_count: parseInt(user.referral_count) || 0,
       email_verified: true,
       kyc_verified: false,
+      city: '',
+      bio: '',
+      avatar_url: '',
       profile: {
         phone: user.phone || '',
         country: user.country || '',
-        city: user.city || '',
-        bio: user.bio || '',
-        avatar_url: user.avatar_url || '',
+        city: '',
+        bio: '',
+        avatar_url: '',
         occupation: 'Инвестор'
       }
     }
@@ -72,13 +75,12 @@ export async function PUT(request: Request) {
     // Обновляем данные пользователя
     const result = await query(
       `UPDATE users 
-       SET full_name = $1, phone = $2, country = $3, city = $4, bio = $5, 
-           updated_at = CURRENT_TIMESTAMP
-       WHERE id = $6::uuid
+       SET full_name = $1, phone = $2, country = $3
+       WHERE id = $4::uuid
        RETURNING id, email, full_name, balance, total_invested, total_earned, 
-               phone, country, city, bio, avatar_url, created_at, role_id,
+               phone, country, created_at, role_id,
                referral_code`,
-      [full_name || '', phone || '', country || '', city || '', bio || '', userId]
+      [full_name || '', phone || '', country || '', userId]
     )
 
     if (result.rows.length === 0) {
@@ -102,12 +104,15 @@ export async function PUT(request: Request) {
       referral_count: parseInt(referralResult.rows[0]?.count) || 0,
       email_verified: true,
       kyc_verified: false,
+      city: '',
+      bio: '',
+      avatar_url: '',
       profile: {
         phone: user.phone || '',
         country: user.country || '',
-        city: user.city || '',
-        bio: user.bio || '',
-        avatar_url: user.avatar_url || '',
+        city: '',
+        bio: '',
+        avatar_url: '',
         occupation: 'Инвестор'
       }
     }

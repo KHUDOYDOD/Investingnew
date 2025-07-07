@@ -35,9 +35,9 @@ export async function GET(request: NextRequest) {
         status,
         created_at,
         description,
-        payment_method as method
+        method
       FROM transactions
-      WHERE user_id = $1
+      WHERE user_id = $1::uuid
       ORDER BY created_at DESC
       LIMIT 50`,
       [decoded.userId]
