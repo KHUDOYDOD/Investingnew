@@ -2,27 +2,18 @@ import { NextRequest, NextResponse } from 'next/server'
 import { query } from '@/lib/database'
 import jwt from 'jsonwebtoken'
 
-export async function GET(request: NextRequest) {
+export async function GET(request: Request) {
   try {
-    // Получаем токен из заголовков
-    const authHeader = request.headers.get('authorization')
-    let token: string | null = null
-
-    if (authHeader && authHeader.startsWith('Bearer ')) {
-      token = authHeader.substring(7)
-    }
+    // Получаем userId из токена
+    const token = request.headers.get('authorization')?.replace('Bearer ', '') || 
+                 request.headers.get('cookie')?.split('token=')[1]?.split(';')[0]
 
     if (!token) {
-      return NextResponse.json({ error: 'Токен не предоставлен' }, { status: 401 })
+      return NextResponse.json({ error: 'Токен не найден' }, { status: 401 })
     }
 
-    // Верифицируем токен
-    let decoded: any
-    try {
-      decoded = jwt.verify(token, process.env.NEXTAUTH_SECRET || 'fallback-secret')
-    } catch (error) {
-      return NextResponse.json({ error: 'Недействительный токен' }, { status: 401 })
-    }
+    const decoded = jwt.verify(token, JWT_SECRET) as { userId: string }
+    const userId = decoded.userId
 
     // Получаем инвестиции пользователя
     const result = await query(

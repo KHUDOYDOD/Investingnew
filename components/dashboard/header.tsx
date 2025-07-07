@@ -16,6 +16,7 @@ import {
   LogOut,
   HelpCircle,
   Zap,
+  ArrowLeft,
 } from "lucide-react"
 import {
   DropdownMenu,
@@ -32,6 +33,14 @@ import { useRouter } from "next/navigation"
 
 export function DashboardHeader() {
   const router = useRouter()
+  
+  const goBack = () => {
+    if (window.history.length > 1) {
+      router.back()
+    } else {
+      router.push('/dashboard')
+    }
+  }
   const [theme, setTheme] = useState<"light" | "dark">("dark")
   const [isSearchOpen, setIsSearchOpen] = useState(false)
   const [notifications, setNotifications] = useState(2)
@@ -142,6 +151,15 @@ export function DashboardHeader() {
 
         {/* Right Side Actions */}
         <div className="flex items-center space-x-2">
+          {/* Back Button */}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={goBack}
+            className="text-white/70 hover:text-white hover:bg-white/10 rounded-xl"
+          >
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
           {/* Search */}
           <AnimatePresence>
             {isSearchOpen ? (

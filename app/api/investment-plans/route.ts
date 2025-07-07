@@ -11,13 +11,10 @@ export async function GET() {
         name, 
         min_amount, 
         max_amount, 
-        profit_rate, 
+        daily_profit_rate as profit_rate, 
         duration_days, 
-        total_return, 
-        is_active, 
-        description,
-        features,
-        created_at
+        description, 
+        is_active 
       FROM investment_plans 
       WHERE is_active = true 
       ORDER BY min_amount ASC

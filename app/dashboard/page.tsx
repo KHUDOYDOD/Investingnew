@@ -472,10 +472,10 @@ function DashboardContent() {
                 >
                   {/* Animated background effect */}
                   <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/10 to-white/0 transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
-                  
+
                   {/* Glow effect */}
                   <div className="absolute inset-0 rounded-3xl bg-gradient-to-r from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                  
+
                   <div className="relative z-10">
                     <div className="text-white mb-4 flex justify-center transform transition-all duration-500 group-hover:scale-125 group-hover:rotate-12">
                       {action.icon}
@@ -486,7 +486,7 @@ function DashboardContent() {
                       <p className="text-white/90 group-hover:text-white text-xs font-medium">{action.limit}</p>
                     </div>
                   </div>
-                  
+
                   {/* Corner decoration */}
                   <div className="absolute top-2 right-2 w-2 h-2 bg-white/30 rounded-full group-hover:scale-150 group-hover:bg-yellow-300 transition-all duration-300"></div>
                 </motion.div>

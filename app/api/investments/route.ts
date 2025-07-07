@@ -74,9 +74,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Рассчитываем параметры инвестиции
-    const plan = planResult.rows[0]
-    const dailyProfitRate = parseFloat(plan.profit_rate)
-    const duration = parseInt(plan.duration_days)
+    const investmentPlan = planResult.rows[0];
+    const dailyProfitRate = parseFloat(investmentPlan.daily_profit_rate || investmentPlan.profit_rate);
+    const duration = parseInt(investmentPlan.duration_days);
     const dailyProfit = (amount * dailyProfitRate) / 100
     const totalProfit = dailyProfit * duration
     const endDate = new Date()
@@ -84,7 +84,7 @@ export async function POST(request: NextRequest) {
 
     // Создаем инвестицию
     const startDate = new Date()
-    
+
 
     const investmentResult = await query(
       `INSERT INTO investments 

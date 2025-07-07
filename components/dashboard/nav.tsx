@@ -320,6 +320,26 @@ export function DashboardNav({ activeItem }: DashboardNavProps) {
                   <p className="text-white/60 text-sm">Статус: Активный</p>
                 </div>
               </div>
+              
+              {/* Quick Navigation */}
+              <div className="mt-4 flex gap-2">
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => handleNavigation("/dashboard")}
+                  className="text-white/70 hover:text-white hover:bg-white/10 text-xs"
+                >
+                  Главная
+                </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => window.history.back()}
+                  className="text-white/70 hover:text-white hover:bg-white/10 text-xs"
+                >
+                  Назад
+                </Button>
+              </div>
             </div>
 
             {/* Navigation */}
