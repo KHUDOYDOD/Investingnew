@@ -1,12 +1,10 @@
 {
-  "/api/dashboard/transactions/route": "app/api/dashboard/transactions/route.js",
-  "/api/investment-plans/route": "app/api/investment-plans/route.js",
-  "/api/admin/hero-settings/route": "app/api/admin/hero-settings/route.js",
   "/api/user-activity/route": "app/api/user-activity/route.js",
-  "/api/statistics/route": "app/api/statistics/route.js",
   "/api/new-users/route": "app/api/new-users/route.js",
-  "/api/dashboard/investments/route": "app/api/dashboard/investments/route.js",
-  "/page": "app/page.js",
-  "/dashboard/investments/page": "app/dashboard/investments/page.js",
-  "/dashboard/transactions/page": "app/dashboard/transactions/page.js"
+  "/api/dashboard/all/route": "app/api/dashboard/all/route.js",
+  "/api/dashboard/transactions/route": "app/api/dashboard/transactions/route.js",
+  "/api/admin/hero-settings/route": "app/api/admin/hero-settings/route.js",
+  "/api/statistics/route": "app/api/statistics/route.js",
+  "/dashboard/page": "app/dashboard/page.js",
+  "/page": "app/page.js"
 }
